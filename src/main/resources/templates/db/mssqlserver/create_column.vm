@@ -1,0 +1,5 @@
+#if($util.isColumnDefinition($field))
+alter table ${tableName} add [$util.getFieldColumnName($field)] $util.getColumnDefinition($field);
+#else
+alter table ${tableName} add [$util.getFieldColumnName($field)] $util.getDbType($field) #if($util.isGeneratedValue($field)) IDENTITY(1,1) NOT NULL #else #if($util.isNullable($field)) NULL #else NOT NULL; #end#end #if($util.isPkField($field)) PRIMARY KEY #end #if($util.isForeignKey($field)) FOREIGN KEY REFERENCES $util.getJoinColumnInfo($field).table()($util.getJoinColumnInfo($field).name())#end;
+#end
