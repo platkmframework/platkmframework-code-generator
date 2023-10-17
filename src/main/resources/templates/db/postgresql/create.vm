@@ -1,0 +1,26 @@
+#set($coma = "")
+#set($tableName = $util.getEntityTableName(${entityClass}))
+#foreach($field in $util.getFieldsWithColumnsTag(${entityClass}))
+#if($util.isGeneratedValue($field))
+#set($columnName = $util.getFieldColumnName($field))
+CREATE SEQUENCE ${tableName}_${columnName}_seq;
+#end
+#end
+CREATE TABLE $tableName(
+#foreach($field in $util.getFieldsWithColumnsTag(${entityClass}))
+#set($columnName = $util.getFieldColumnName($field))
+#if($util.isColumnDefinition($field))
+${coma}$columnName $util.getColumnDefinition($field)
+#else
+${coma}$columnName $util.getDbType($field) #if($util.isGeneratedValue($field)) NOT NULL DEFAULT nextval('${tableName}_${columnName}_seq')#else #if($util.isNullable($field)) NULL #else NOT NULL #end#end #if($util.isPkField($field)) PRIMARY KEY #end
+#end
+#set($coma = ",")
+#end
+);
+#set($fkConstant = "_fk")
+#foreach($field in $util.getFieldsWithColumnsTag(${entityClass}))
+#if($util.isForeignKey($field)) 
+#set($columnName = $util.getFieldColumnName($field))
+ALTER TABLE ${tableName} ADD CONSTRAINT ${tableName}_${columnName}${fkConstant} FOREIGN KEY ($columnName) REFERENCES $util.getJoinColumnInfo($field).table() ($util.getJoinColumnInfo($field).name());
+#end
+#end

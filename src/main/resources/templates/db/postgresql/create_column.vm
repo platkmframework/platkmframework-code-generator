@@ -1,0 +1,17 @@
+#set($tableName = $util.getEntityTableName(${entityClass}))
+#set($columnName = $util.getFieldColumnName($field))
+#set($seqConst = "_seq")
+#if($util.isColumnDefinition($field))
+alter table ${tableName} add $util.getFieldColumnName($field) $util.getColumnDefinition($field);
+#else
+alter table ${tableName} add $util.getFieldColumnName($field) $util.getDbType($field) #if($util.isNullable($field)) NULL #else NOT NULL; #end;
+#if($util.isForeignKey($field)) 
+ALTER TABLE ${tableName} ADD CONSTRAINT ${tableName}_$util.getFieldColumnName($field)_fk FOREIGN KEY ($util.getFieldColumnName($field)) REFERENCES $util.getJoinColumnInfo($field).table() ($util.getJoinColumnInfo($field).name());
+#end
+#if($util.isPkField($field))
+ALTER TABLE ${tableName} ADD PRIMARY KEY ($util.getFieldColumnName($field));
+#end
+#if($util.isGeneratedValue($field))
+CREATE SEQUENCE IF NOT EXISTS ${tableName}${columnName}${seqConst};
+#end
+#end

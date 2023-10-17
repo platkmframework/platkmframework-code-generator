@@ -245,8 +245,11 @@ public class GeneratorProcessorEntityToDb extends GeneratorProcessorBase {
         Collection<Class<?>> entities = getEntities();
         if(entities != null && !entities.isEmpty() ){
 
-            con = DriverManager.getConnection(serverURL, user, password);
+            //con = DriverManager.getConnection(serverURL, user, password);
+            con = DriverManager.getConnection(url, user, password);
             con.setAutoCommit(true);
+            processCreateScriptsByEntities(contextMap, entities, templateProcessorEngine);
+            /**
             DatabaseReader databaseReader = new DatabaseReader(con, getExcludedTables(excludedTables));
 
             if(databaseReader.schemaExists(schema)){  
@@ -258,7 +261,7 @@ public class GeneratorProcessorEntityToDb extends GeneratorProcessorBase {
                 }
             }else { 
                 processCreateScriptsByEntities(contextMap, entities, templateProcessorEngine);
-            }
+            }*/
         }else {
                 sendMessage("No se encontraron Entidades para generar los scripts de creación");
         }
@@ -267,14 +270,15 @@ public class GeneratorProcessorEntityToDb extends GeneratorProcessorBase {
 
     private void processCreateScriptsByEntities(Map<String, Object> contextMap, Collection<Class<?>> entities, TemplateProcessorEngine templateProcessorEngine) throws SQLException, IOException{
 
-        String result = templateProcessorEngine.generate("/templates/db/" + databaseType + "/create_database.vm", contextMap); 
-        sendMessage(result);
-        con.createStatement().execute(result);
-        con.commit();
-        con.close();
+    	String result;
+        //String result = templateProcessorEngine.generate("/templates/db/" + databaseType + "/create_database.vm", contextMap); 
+        //sendMessage(result);
+        //con.createStatement().execute(result);
+        //con.commit();
+        //con.close();
 
-        con = DriverManager.getConnection(url, user, password);
-        con.setAutoCommit(true);
+    	//con = DriverManager.getConnection(url, user, password);
+    	//con.setAutoCommit(true);
 
         StringBuilder bf = new StringBuilder();
         for (Class<?> class1 : entities){
@@ -286,7 +290,7 @@ public class GeneratorProcessorEntityToDb extends GeneratorProcessorBase {
  
         if("s".equalsIgnoreCase(confirmProcess("A continuación se ejecutarán los scripts en la base de datos. Desea continuar (s,n)"))){
             con.createStatement().execute(bf.toString());
-            con.commit();
+            //con.commit();
             sendMessage("Proceso realizado satisfactoriamente");
         }
     }
@@ -321,7 +325,7 @@ public class GeneratorProcessorEntityToDb extends GeneratorProcessorBase {
             }
         }else{
             if(file.getName().endsWith(".class")){
-                String fileName = file.getAbsolutePath().replace(projectClassesPathFolder + File.separator,"");
+                String fileName = file.getAbsolutePath().replace(projectClassesPathFolder.replace("/", File.separator).replace("\\", File.separator) + File.separator,"");
                 Class<?> cls = cl.loadClass(fileName.substring(0, fileName.lastIndexOf(".")).replace('/', '.').replace('\\', '.'));
                 if(cls.isAnnotationPresent(Entity.class)){
                     entities.add(cls);

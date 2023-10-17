@@ -112,10 +112,11 @@ public class Util {
             if(field.getType().getName().equals(java.sql.Date.class.getName()) ||
                             field.getType().getName().equals(java.util.Date.class.getName()) ||
                             field.getType().getName().startsWith("java.time")) {
-                    return dbDataType.replace("${precision}", "").replace("${scale}", "");
+                    return dbDataType.replace("${precision}", "").replace("${scale}", "").replace("${length}", "");
             }else {
                     return dbDataType.replace("${precision}", String.valueOf(fieldcolumn.precision())).
-                                    replace("${scale}", String.valueOf(fieldcolumn.scale()));
+                                    replace("${scale}", String.valueOf(fieldcolumn.scale())).
+                                    		replace("${length}", String.valueOf(fieldcolumn.length()));
             }
 	}
 	
